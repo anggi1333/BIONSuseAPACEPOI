@@ -12,15 +12,10 @@ public class Run {
         System.setProperty("webdriver.chrome.driver", "D:\\chromedriver.exe");
 
         ChromeOptions options = new ChromeOptions();
-// Specify the path to the Chromium binary
         options.setBinary("D:\\chrome-win\\chrome.exe");
 
         WebDriver driver = new ChromeDriver(options);
-
-// Use the correct URL (assuming your URL is correct)
         driver.get("http://192.168.1.32:8080/oaccess/");
-
-// Ensure the browser window is maximized
         driver.manage().window().maximize();
 
         ExtentReports extent = new ExtentReports();
