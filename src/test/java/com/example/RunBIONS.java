@@ -5,6 +5,8 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,24 +25,18 @@ public class RunBIONS {
         options.setBinary("D:\\chrome-win\\chrome.exe");
         options.addArguments("--disable-notifications");
 
-
         // Initialize WebDriver
         WebDriver driver = new ChromeDriver(options);
-
         try {
-            // Excel reader setup
-            ExcelReader excelReader = new ExcelReader("D:/Tech/login.xlsx");
-            Iterator<Row> rowIterator = excelReader.getRowIterator();
 
             // Navigate to the login page
             driver.get("https://appdev.bions.id/login");
-            driver.manage().window().maximize();
 
             // Perform login
-            Login.testScenariologin(driver, "DEV", "reni666", "d", "q12345");
+            Login.log(driver);
 
             // Perform stock buying actions
-            StockBuy.Buy(driver, rowIterator, excelReader);
+            StockBuy.Buy(driver);
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,8 +1,6 @@
 package com.example;
 
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
@@ -11,15 +9,18 @@ import java.io.IOException;
 import java.util.Iterator;
 
 public class ExcelReader {
+    private String filePath;
     private Workbook workbook;
     private Sheet sheet;
-    private String filePath;
 
-    public ExcelReader(String filePath) throws IOException {
+    public ExcelReader(String filePath, String sheetName) {
         this.filePath = filePath;
-        try (FileInputStream fis = new FileInputStream(filePath)) {
-            this.workbook = new XSSFWorkbook(fis);
-            this.sheet = workbook.getSheetAt(0); // Assuming the first sheet is used
+        try {
+            FileInputStream excelFile = new FileInputStream(filePath);
+            this.workbook = new XSSFWorkbook(excelFile);
+            this.sheet = workbook.getSheet(sheetName);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -27,35 +28,47 @@ public class ExcelReader {
         return sheet.iterator();
     }
 
-    public void updateResult(int rowIndex, String result) {
-        Row row = sheet.getRow(rowIndex);
-        if (row == null) {
-            row = sheet.createRow(rowIndex);
-        }
-        row.createCell(3).setCellValue(result); // Assuming column 2 is for Actual Result
-        save();
+    public void updateResult(int rowIndex, String actualResult) {
+        Row row = sheet.getRow(rowIndex-1);
+        Cell cell = row.createCell(4);
+        cell.setCellValue(actualResult);
     }
 
     public void updateStatus(int rowIndex, String status) {
-        Row row = sheet.getRow(rowIndex);
-        if (row == null) {
-            row = sheet.createRow(rowIndex);
-        }
-        row.createCell(4).setCellValue(status); // Assuming column 3 is for Status
-        save();
+        Row row = sheet.getRow(rowIndex-1);
+        Cell cell = row.createCell(5);
+        cell.setCellValue(status);
     }
 
-    public void addSummaryRow(int passCount, int failCount) {
-        int lastRow = sheet.getLastRowNum() + 1;
-        Row row = sheet.createRow(lastRow);
-        row.createCell(0).setCellValue("Pass Count: " + passCount);
-        row.createCell(1).setCellValue("Fail Count: " + failCount);
-        save();
+    public void addSummaryRow(int totalPass, int totalFailed) {
+        int rowIndex = sheet.getLastRowNum() + 1; // Add new row after the last row
+
+        Row summaryRow = sheet.createRow(rowIndex);
+
+        // Create cell to store total PASS count
+        Cell passCell = summaryRow.createCell(4);
+        passCell.setCellValue("Total PASS: " + totalPass);
+
+        // Create cell to store total FAILED count
+        Cell failedCell = summaryRow.createCell(5);
+        failedCell.setCellValue("Total FAILED: " + totalFailed);
+
+        // Create style for cells
+        CellStyle style = workbook.createCellStyle();
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
+
+        // Apply style to cells
+        passCell.setCellStyle(style);
+        failedCell.setCellStyle(style);
     }
 
-    private void save() {
-        try (FileOutputStream outputStream = new FileOutputStream(filePath)) {
+    public void saveChanges() {
+        try {
+            FileOutputStream outputStream = new FileOutputStream(filePath);
             workbook.write(outputStream);
+            workbook.close();
+            outputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
